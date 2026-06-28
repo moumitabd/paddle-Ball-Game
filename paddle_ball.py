@@ -1,21 +1,25 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
+import random 
 
 ball_x = 250
 ball_y = 400
 
-ball_dx = 2
-ball_dy = -2
+# শুরুর স্পিড
+ball_dx = 2.0
+ball_dy = -2.0
 
 radius = 15
 
-paddle_x = 180
-paddle_width = 140
+paddle_x = 200 # প্যাডেল ছোট করায় শুরুর পজিশন একটু অ্যাডজাস্ট করা হয়েছে
+paddle_width = 100 # <--- প্যাডেলের সাইজ ১৪০ থেকে কমিয়ে ১০০ করা হলো
 
 score = 0
 game_over = False
 
+# Color state variable initialize
+current_ball_color = (1.0, 0.5, 0.0) 
 
 def drawPixel(x, y):
     glBegin(GL_POINTS)
@@ -92,19 +96,27 @@ def drawText(x, y, text):
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ord(ch))
 
 
+def change_ball_color():
+    global current_ball_color
+    r = random.uniform(0.3, 1.0) 
+    g = random.uniform(0.3, 1.0)
+    b = random.uniform(0.3, 1.0)
+    current_ball_color = (r, g, b)
+
+
 def display():
     glClear(GL_COLOR_BUFFER_BIT)
 
-    glColor3f(1, 1, 1)
+    glColor3f(1, 1, 1) 
     drawBoundary()
 
-    glColor3f(0, 1, 1)
+    glColor3f(0, 1, 1) 
     drawPaddle()
 
-    glColor3f(1, 0.5, 0)
+    glColor3f(current_ball_color[0], current_ball_color[1], current_ball_color[2]) 
     midpointCircle(ball_x, ball_y, radius)
 
-    glColor3f(1, 1, 0)
+    glColor3f(1, 1, 0) 
     drawText(60, 470, "Score: " + str(score))
 
     if game_over:
@@ -129,17 +141,33 @@ def update(value):
 
     if ball_x + radius >= 450:
         ball_dx = -ball_dx
+        change_ball_color()
 
     if ball_x - radius <= 50:
         ball_dx = -ball_dx
+        change_ball_color()
 
     if ball_y + radius >= 450:
         ball_dy = -ball_dy
+        change_ball_color()
 
+    # প্যাডেলে বল লাগলে স্কোর এবং স্পিড বাড়ানোর লজিক
     if 80 <= ball_y - radius <= 90:
         if paddle_x <= ball_x <= paddle_x + paddle_width:
             ball_dy = abs(ball_dy)
             score += 1
+            change_ball_color()
+
+            # প্রতি স্কোরে ৫% গতি বাড়বে
+            speed_multiplier = 1.05
+            ball_dx *= speed_multiplier
+            ball_dy *= speed_multiplier
+            
+            max_speed = 8.0
+            if abs(ball_dx) > max_speed:
+                ball_dx = max_speed if ball_dx > 0 else -max_speed
+            if ball_dy > max_speed:
+                ball_dy = max_speed
 
     if ball_y < 40:
         game_over = True
@@ -155,6 +183,7 @@ def keyboard(key, x, y):
     global ball_x, ball_y
     global ball_dx, ball_dy
     global score, game_over
+    global current_ball_color 
 
     if key == b'a':
         paddle_x -= 20
@@ -165,17 +194,19 @@ def keyboard(key, x, y):
     if key == b'r' and game_over:
         ball_x = 250
         ball_y = 400
-        ball_dx = 2
-        ball_dy = -2
+        ball_dx = 2.0
+        ball_dy = -2.0
         score = 0
         game_over = False
+        current_ball_color = (1.0, 0.5, 0.0)
         glutTimerFunc(16, update, 0)
 
-    if paddle_x < 60:
-        paddle_x = 60
+    # প্যাডেলের বাউন্ডারি চেক (ছোট প্যাডেলের স্ক্রিন লিমিট অনুযায়ী আপডেট করা হয়েছে)
+    if paddle_x < 50:
+        paddle_x = 50
 
-    if paddle_x + paddle_width > 440:
-        paddle_x = 440 - paddle_width
+    if paddle_x + paddle_width > 450:
+        paddle_x = 450 - paddle_width
 
     glutPostRedisplay()
 
@@ -189,7 +220,7 @@ def init():
 glutInit()
 glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB)
 glutInitWindowSize(500, 500)
-glutCreateWindow(b"Final Paddle Ball Game")
+glutCreateWindow(b"Final Paddle Ball Game - Colored Bounces")
 
 init()
 
