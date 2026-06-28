@@ -6,14 +6,13 @@ import random
 ball_x = 250
 ball_y = 400
 
-# শুরুর স্পিড
 ball_dx = 2.0
 ball_dy = -2.0
 
 radius = 15
 
-paddle_x = 200 # প্যাডেল ছোট করায় শুরুর পজিশন একটু অ্যাডজাস্ট করা হয়েছে
-paddle_width = 100 # <--- প্যাডেলের সাইজ ১৪০ থেকে কমিয়ে ১০০ করা হলো
+paddle_x = 200
+paddle_width = 100
 
 score = 0
 game_over = False
@@ -151,14 +150,14 @@ def update(value):
         ball_dy = -ball_dy
         change_ball_color()
 
-    # প্যাডেলে বল লাগলে স্কোর এবং স্পিড বাড়ানোর লজিক
+    
     if 80 <= ball_y - radius <= 90:
         if paddle_x <= ball_x <= paddle_x + paddle_width:
             ball_dy = abs(ball_dy)
             score += 1
             change_ball_color()
 
-            # প্রতি স্কোরে ৫% গতি বাড়বে
+            
             speed_multiplier = 1.05
             ball_dx *= speed_multiplier
             ball_dy *= speed_multiplier
@@ -201,7 +200,7 @@ def keyboard(key, x, y):
         current_ball_color = (1.0, 0.5, 0.0)
         glutTimerFunc(16, update, 0)
 
-    # প্যাডেলের বাউন্ডারি চেক (ছোট প্যাডেলের স্ক্রিন লিমিট অনুযায়ী আপডেট করা হয়েছে)
+    
     if paddle_x < 50:
         paddle_x = 50
 
